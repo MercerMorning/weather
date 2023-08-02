@@ -18,6 +18,13 @@ framework:
     php_errors:
         log: true
 
+    http_client:
+        scoped_clients:
+            weather.client:
+                base_uri: '%env(WEATHER_SERVICE_URI)%'
+            geocoder.client:
+                base_uri: '%env(GEOCODER_SERVICE_URI)%'
+
 when@test:
     framework:
         test: true

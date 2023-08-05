@@ -1,40 +1,42 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\v1;
+namespace App\Service\v1\Weather;
 
 use App\DTO\CoordinatesDTO;
-use Symfony\Contracts\Cache\ItemInterface;
+use App\DTO\WeatherDTO;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class WeatherService
+class WeatherServiceRequester
 {
-    readonly private HttpClientInterface $client;
-
-    private readonly TagAwareCacheInterface $cache;
+    private HttpClientInterface $client;
 
     private string $apiKey;
 
     public function __construct(
         HttpClientInterface    $weatherClient,
-        string                 $apiKey,
-        TagAwareCacheInterface $cache
+        string                 $apiKey
     )
     {
         $this->client = $weatherClient;
         $this->apiKey = $apiKey;
-        $this->cache = $cache;
     }
 
-    public function getWeatherByCoordinates(CoordinatesDTO $coordinates)
+    /**
+     * @return WeatherDTO[]
+     */
+    public function getWeatherByCoordinates(CoordinatesDTO $coordinates): array
     {
-        $content = $this->client->request('GET', '', [
+        $content = $this->client->request('GET', '/data/2.5/forecast', [
             'query' => [
                 'appid' => $this->apiKey,
+                'units' => 'metric',
                 'lat' => $coordinates->getLatitude(),
                 'lon' => $coordinates->getLongitude(),
             ],
         ])->getContent();
+
+        return json_decode($content, true, 512, JSON_THROW_ON_ERROR);
     }
 }

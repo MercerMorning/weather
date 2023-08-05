@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace App\Service\v1;
 
+use App\Service\v1\Geocoder\GeocoderService;
+use App\Service\v1\Weather\WeatherService;
+use Psr\Cache\InvalidArgumentException;
+
 class WeatherDataHandlerService
 {
-    private readonly GeocoderService $geocoderService;
-    private readonly WeatherService $weatherService;
+    private GeocoderService $geocoderService;
+    private WeatherService $weatherService;
 
     /**
      * @param GeocoderService $geocoderService
@@ -19,9 +23,13 @@ class WeatherDataHandlerService
     }
 
 
-    public function getWeatherByCity(string $city)
+    /**
+     * @throws \JsonException
+     * @throws InvalidArgumentException
+     */
+    public function getWeatherByCity(string $city) :array
     {
-        $coordinates = $this->geocoderService->getCoordinatesByCity('moscow');
-        $weather = $this->weatherService->getWeatherByCoordinates($coordinates);
+        $coordinates = $this->geocoderService->getCoordinatesByCity($city);
+        return $this->weatherService->getWeatherByCoordinates($coordinates);
     }
 }
